@@ -30,7 +30,7 @@ Currently we haven't deployed live ourselves, so your guess is as good as ours a
 * **Christopher Rupert** - *Security Officer and Full Stack Developer for User Management*
 * **Zach White** - *Full Stack Developer for Chat*
 
-See also the list of [contributors](https://github.com/squair/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/kerblammo/squair/contributors) who participated in this project.
 
 ## License
 
