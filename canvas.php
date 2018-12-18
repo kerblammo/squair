@@ -39,10 +39,10 @@ and open the template in the editor.
                 </div>
             </div>
             
-            <div id="colorTools" class="row">
+       <div id="colorTools" class="row">
               
           <div id="colorCurrent" class="column50" style="height: 50px; background-color: beige">
-                Color: <input class="jscolor" value="ab2567">
+                Color: <input id="colorInput" class="jscolor" value="ab2567" onchange="saveUsedColor();">
             </div>
 <!--                <div id="colorCurrent" class="column25" style="height: 50px; background-color: rgb(255, 111, 0);">
                     Current Color
@@ -56,52 +56,52 @@ and open the template in the editor.
             </div>
             
             <div id="paletteBox" class="row">
-                <div id="fillHeight" class="row">
-                    <div id="savedColor" class="column25">
-                        
+                <div id="row1" >
+                    <div id="usedColor1" class="savedColor" >
+                       
                     </div>
-                    <div id="savedColor" class="column25">
-                        
+                    <div id="usedColor2" class="savedColor" >
+                       
                     </div>
-                    <div id="savedColor" class="column25">
-                        
+                    <div id="usedColor3" class="savedColor" >
+                    
                     </div>
-                    <div id="savedColor" class="column25">
-                        
+                    <div id="usedColor4" class="savedColor" >
+                       
                     </div>
                 </div>
-                <div id="" class="row">
-                    <div id="savedColor" class="column25">
+                <div id="row2" >
+                    <div id="usedColor5" class="savedColor" >
                     
                     </div>
-                    <div id="savedColor" class="column25">
-                    
+                    <div id="usedColor6" class="savedColor" >
+                
                     </div>
-                    <div id="savedColor" class="column25">
-                    
+                    <div id="usedColor7" class="savedColor" >
+                 
                     </div>
-                    <div id="savedColor" class="column25">
+                    <div id="usedColor8" class="savedColor" >
                     
                     </div>
                 </div>
-                <div id="" class="row">
-                    <div id="savedColor" class="column25">
+                <div id="row3">
+                    <div id="usedColor9" class="savedColor" >
                     
                     </div>
-                    <div id="savedColor" class="column25">
+                    <div id="usedColor10" class="savedColor" >
                     
                     </div>
-                    <div id="savedColor" class="column25">
-                    
+                    <div id="usedColor11" class="savedColor" >
+                   
                     </div>
-                    <div id="savedColor" class="column25">
-                    
+                    <div id="usedColor12" class="savedColor" >
+                   
                     </div>                    
                 </div>
             </div>
             
             <div id="toolBoxBot" class="row">
-                    
+                <p>Zoom lenzez</p>
             </div>
         </div>
     </body>

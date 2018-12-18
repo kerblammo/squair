@@ -59,3 +59,25 @@ function handleRowClick(e) {
     clearSelections();
     e.target.classList.add("highlighted");
 }
+
+function saveUsedColor(){
+  //saves the color user have used and displays it
+  
+  var squares = document.querySelectorAll(".savedColor");
+  
+  //get the color that user has chosen from the color picker
+  var colorCode = document.querySelector("#colorInput").value;
+  
+  
+  //loop through the squares and find the one with nothing in it
+  // shove the color in that box
+   for(var i = 0; i < 12; i++){
+      var temp = squares[i];
+      if(temp.style.backgroundColor == ""){
+          temp.style.backgroundColor = "#" + colorCode ;
+          break;
+      }//end if  
+  }//end for
+  
+}//end ftn
+
