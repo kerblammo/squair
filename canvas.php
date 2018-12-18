@@ -9,6 +9,7 @@ and open the template in the editor.
         <meta charset="UTF-8">        
         <link rel="stylesheet" type="text/css" href="css/main.css">
         <script src="scripts/canvas.js"></script>
+        <script src="scripts/jscolor.js"></script>
         <title>Squair - The community drawing board</title>
     </head>
     <body>
@@ -39,12 +40,16 @@ and open the template in the editor.
             </div>
             
             <div id="colorTools" class="row">
-                <div id="colorCurrent" class="column25" style="height: 50px; background-color: rgb(255, 111, 0);">
+              
+          <div id="colorCurrent" class="column50" style="height: 50px; background-color: beige">
+                Color: <input class="jscolor" value="ab2567">
+            </div>
+<!--                <div id="colorCurrent" class="column25" style="height: 50px; background-color: rgb(255, 111, 0);">
                     Current Color
-                </div>
-                <div id="colorMatchTool" class="column25">
+                </div>-->
+<!--                <div id="colorMatchTool" class="column25">
                     Match Tool
-                </div>
+                </div>-->
                 <div id="colorBalance" class="column50">
                     Budget: 100
                 </div>
