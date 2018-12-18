@@ -14,7 +14,7 @@ public class Move {
     private int canvasId;
     private int xPosition;
     private int yPosition;
-    private String HexValue;
+    private String hexValue;
     private Timestamp timestamp;
 
     public int getCanvasId() {
@@ -30,7 +30,7 @@ public class Move {
     }
 
     public String getHexValue() {
-        return HexValue;
+        return hexValue;
     }
 
     public Timestamp getTimestamp() {
@@ -41,7 +41,7 @@ public class Move {
         this.canvasId = canvasId;
         this.xPosition = xPosition;
         this.yPosition = yPosition;
-        this.HexValue = HexValue;
+        this.hexValue = HexValue;
         this.timestamp = timestamp;
     }
     
