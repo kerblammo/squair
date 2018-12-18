@@ -1,23 +1,26 @@
-
 package controller;
 
 import com.google.gson.Gson;
 import dbaccess.CanvasAccessor;
+import dbaccess.MoveAccessor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import model.Canvas;
+import model.Move;
 
 /**
  *
  * @author Pete
  */
-@WebServlet(name = "canvasService", urlPatterns = {"/canvasservice/canvas/*"})
+@WebServlet(name = "canvasService", urlPatterns = {"/canvasservice/load/*", "/canvasservice/refresh/*"})
 public class canvasService extends HttpServlet {
 
     /**
@@ -46,20 +49,30 @@ public class canvasService extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try (PrintWriter out = response.getWriter()){
-            
+        try (PrintWriter out = response.getWriter()) {
+
             //build gson object and get path info
             Gson g = new Gson();
             String uri = request.getRequestURI();
             String pi = request.getPathInfo();
-            //get a single canvas by its id
-            if (pi != null){
-                //pi should match pattern "/####"
-                int id = Integer.parseInt(pi.substring(1));
-                Canvas canvas = CanvasAccessor.getCanvas(id);
-                out.print(g.toJson(canvas));
+            if (uri.contains("load")) {
+                //get a single canvas by its id
+                if (pi != null) {
+                    //pi should match pattern "/####"
+                    int id = Integer.parseInt(pi.substring(1));
+                    Canvas canvas = CanvasAccessor.getCanvas(id);
+                    out.print(g.toJson(canvas));
+                }
+            } else if (uri.contains("refresh")){
+                //get canvas id and date
+                String[] params = pi.split("/");
+                int id = Integer.parseInt(params[1]);
+                Timestamp time = new Timestamp(Long.parseLong(params[2]));
+                List<Move> moves = MoveAccessor.getMoves(id, time);
+                out.print(g.toJson(moves));
             }
-        } catch (SQLException ex){
+
+        } catch (SQLException ex) {
             System.err.println(ex.getMessage());
         }
     }
