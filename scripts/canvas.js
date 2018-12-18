@@ -16,6 +16,8 @@ window.onload = function () {
         console.log(i);
     }
 }
+  //saves the color user have used and displays it
+  var colorCounter = 0;
 
 function loadGrid(){
     var html = "";
@@ -61,8 +63,11 @@ function handleRowClick(e) {
 }
 
 function saveUsedColor(){
-  //saves the color user have used and displays it
   
+   if(colorCounter == 12){
+       colorCounter = 0;
+   }
+   
   var squares = document.querySelectorAll(".savedColor");
   
   //get the color that user has chosen from the color picker
@@ -71,13 +76,13 @@ function saveUsedColor(){
   
   //loop through the squares and find the one with nothing in it
   // shove the color in that box
-   for(var i = 0; i < 12; i++){
-      var temp = squares[i];
-      if(temp.style.backgroundColor == ""){
+   for(var i = colorCounter; i < 12; i++){
+      var temp = squares[i];  
           temp.style.backgroundColor = "#" + colorCode ;
           break;
-      }//end if  
   }//end for
+  
+  colorCounter++;;
   
 }//end ftn
 
