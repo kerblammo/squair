@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>API Test Page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script>
+            var time = new Date();
+            window.onload = function () {
+                document.querySelector('#submit').addEventListener('click', submitHandler);
+                 
+            };
+
+            function submitHandler() { 
+                //get update panel options
+                var url = "canvasservice/refresh/1/" + Number(time);
+                var method = "GET";
+                var xmlhttp = new XMLHttpRequest();
+                xmlhttp.onreadystatechange = function () {
+                    if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+                        console.log(xmlhttp.responseText);
+                        console.log(JSON.parse(xmlhttp.responseText));
+                        writeOutput(xmlhttp.responseText);
+                    }
+                };
+                xmlhttp.open(method, url, true);
+                xmlhttp.send();
+            }
+            
+            function writeOutput(text){
+                document.querySelector('#output').textContent = text;
+            }
+        </script>
+    </head>
+    <body>
+        <button id="submit">Submit</button>
+        <div id="output"><p></p></div>
+    </body>
+</html>
