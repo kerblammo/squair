@@ -18,9 +18,18 @@ and open the template in the editor.
 
             function submitHandler() { 
                 //get update panel options
-                var url = "canvasservice/refresh/1/" + Number(time);
-                var method = "GET";
+                var url = "canvasservice";
+                var method = "POST";
                 var xmlhttp = new XMLHttpRequest();
+                var obj = {
+                    userId : 2,
+                    permission : 1,
+                    canvasId : 1,
+                    xPosition : 99,
+                    yPosition : 99,
+                    hexValue : "00FFFF",
+                    timestamp : null
+                };
                 xmlhttp.onreadystatechange = function () {
                     if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
                         console.log(xmlhttp.responseText);
@@ -29,7 +38,7 @@ and open the template in the editor.
                     }
                 };
                 xmlhttp.open(method, url, true);
-                xmlhttp.send();
+                xmlhttp.send(JSON.stringify(obj));
             }
             
             function writeOutput(text){

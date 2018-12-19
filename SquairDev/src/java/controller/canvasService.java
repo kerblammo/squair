@@ -1,6 +1,10 @@
 package controller;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import dbaccess.BudgetAccessor;
 import dbaccess.CanvasAccessor;
 import dbaccess.MoveAccessor;
 import java.io.IOException;
@@ -8,6 +12,7 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Scanner;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -20,7 +25,7 @@ import model.Move;
  *
  * @author Pete
  */
-@WebServlet(name = "canvasService", urlPatterns = {"/canvasservice/load/*", "/canvasservice/refresh/*"})
+@WebServlet(name = "canvasService", urlPatterns = {"/canvasservice/load/*", "/canvasservice/refresh/*", "/canvasservice"})
 public class canvasService extends HttpServlet {
 
     /**
@@ -63,7 +68,7 @@ public class canvasService extends HttpServlet {
                     Canvas canvas = CanvasAccessor.getCanvas(id);
                     out.print(g.toJson(canvas));
                 }
-            } else if (uri.contains("refresh")){
+            } else if (uri.contains("refresh")) {
                 //get canvas id and date
                 String[] params = pi.split("/");
                 int id = Integer.parseInt(params[1]);
@@ -88,7 +93,46 @@ public class canvasService extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try (PrintWriter out = response.getWriter()) {
+
+            //build gson object and get path info
+            Gson g = new Gson();
+            String uri = request.getRequestURI();
+            String pi = request.getPathInfo();
+            
+            //build Move object from JSON
+            Scanner sc = new Scanner(request.getReader());
+            String jsonData = sc.nextLine();
+            Move move = g.fromJson(jsonData, Move.class);
+            
+            //get userId and permission level
+            JsonElement jsonElement = new JsonParser().parse(jsonData);
+            JsonObject jobject = jsonElement.getAsJsonObject();
+            int userId = jobject.get("userId").getAsInt();
+            int permission = jobject.get("permission").getAsInt();
+            //out.println("Permission Level: " + permission);
+
+            //if user does not have super privileges, they must spend their budget
+            boolean budgetConfirmed = true;
+            if (permission == 0){
+                budgetConfirmed = spendBudget(userId, move.getCanvasId());
+            }
+            
+            //stop here if something failed when spending budget
+            if (budgetConfirmed){
+                //must update both Drawing table and DrawingHistory table
+                try {
+                   boolean success = CanvasAccessor.paintCanvas(move);
+                   out.println(success);
+                } catch (SQLException ex){
+                    System.err.println(ex.getMessage());
+                    out.println("ERROR: SQLException thrown");
+                }
+                
+                
+            }
+            
+        }
     }
 
     /**
@@ -100,5 +144,21 @@ public class canvasService extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    /**
+     * Alter a user's wallet values 
+     * @param userId the user spending budget
+     * @param canvasId the canvas being spent on
+     */
+    private boolean spendBudget(int userId, int canvasId) {
+        boolean valid;
+        try {
+            valid = BudgetAccessor.spendBudget(userId, canvasId);
+        } catch (SQLException ex){
+            System.err.println(ex.getMessage());
+            valid = false;
+        }
+        return valid;
+    }
 
 }

@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import model.Canvas;
+import model.Move;
 
 /**
  * Accessor for Canvases in the database
@@ -16,6 +17,8 @@ public class CanvasAccessor {
     private static Connection conn;
     private static PreparedStatement selectByIdStatement;
     private static PreparedStatement selectDrawingByIdStatement;
+    private static PreparedStatement updateDrawingByMoveStatement;
+    private static PreparedStatement createHistoryByMoveStatement;
 
     
     
@@ -29,6 +32,8 @@ public class CanvasAccessor {
             conn = ConnectionManager.getConnection();
             selectByIdStatement = conn.prepareStatement("SELECT * FROM canvas WHERE Id = ?");
             selectDrawingByIdStatement = conn.prepareStatement("SELECT * FROM drawing WHERE CanvasId = ? ORDER BY YPosition, XPosition");
+            updateDrawingByMoveStatement = conn.prepareStatement("UPDATE drawing SET HexValue = ? WHERE CanvasId = ? AND XPosition = ? AND YPosition = ?");
+            createHistoryByMoveStatement = conn.prepareStatement("INSERT INTO drawinghistory (CanvasId, XPosition, YPosition, HexValue, Timestamp) VALUES (?, ?, ?, ?, NOW())");
         }
         
         
@@ -61,9 +66,6 @@ public class CanvasAccessor {
         
         return canvas;
         
-        
-        
-        
     }
     
     //Turns a resultset from the drawing table into an organized array of coloured pixels 
@@ -78,6 +80,37 @@ public class CanvasAccessor {
         }
         return results;
         
+    }
+    
+    /**
+     * Draw on the canvas by updating its Drawing and DrawingHistory records
+     * @param move
+     * @return 
+     */
+    public static boolean paintCanvas(Move move) throws SQLException{
+        boolean success;
+        
+        init();
+        //try Drawing first
+        //bind parameters
+        updateDrawingByMoveStatement.setString(1, move.getHexValue());
+        updateDrawingByMoveStatement.setInt(2, move.getCanvasId());
+        updateDrawingByMoveStatement.setInt(3, move.getxPosition());
+        updateDrawingByMoveStatement.setInt(4, move.getyPosition());
+        success = updateDrawingByMoveStatement.executeUpdate() == 1;
+        
+        //stop here if first update failed
+        if (success){
+            //create new record in drawingHistory
+            createHistoryByMoveStatement.setInt(1, move.getCanvasId());
+            createHistoryByMoveStatement.setInt(2, move.getxPosition());
+            createHistoryByMoveStatement.setInt(3, move.getyPosition());
+            createHistoryByMoveStatement.setString(4, move.getHexValue());
+            success = createHistoryByMoveStatement.executeUpdate() == 1;
+        }
+        
+        
+        return success;
     }
     
     
