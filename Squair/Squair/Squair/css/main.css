@@ -1,0 +1,184 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 15-Dec-2018, 9:58:11 AM
+    Author     : Zach-
+*/
+
+html,
+body {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    background-attachment: fixed;
+    font-family: 'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+    background-color: whitesmoke;
+    font-family: 'RobotoRegular', 'Droid Sans', 'Segoe UI', Segoe, 'San Francisco', 'Helvetica Neue', Helvetica, Arial, Geneva, sans-serif;
+    font-size: 12px;
+}
+
+h1 {
+    width: 100%;
+    height: 100%;
+    font-size: 24px;
+    font-weight: bolder;
+    margin: 0 0 0 0;
+    padding: 0 0 0 5%;
+    color: black;
+}
+
+input {
+    width: 10%;
+}
+
+table {
+    width: 75%;
+    text-align: center;
+    margin: auto;
+    border: solid thin gray;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: solid thin gray;
+    border-collapse: collapse;
+    padding: 10px;
+}
+
+th {
+    background-color: navy;
+    color: white;
+    font-weight: bold;
+}
+
+.hidden {
+    display: none;
+    /*
+    opacity: 0.25;
+    */
+}
+
+.invisible{
+    visibility: hidden;
+}
+
+.highlighted {
+    background-color: yellow;
+}
+
+.row{
+    width: 100%;
+    clear: both;
+}
+
+.column{
+    float: left;
+    width: 10%;
+}
+
+.column25{
+    float: left;
+    width: 25%;
+}
+
+.column50{
+    float: left;
+    width: 50%;
+}
+
+#fillHeight{
+    height: 100%;
+}
+
+#gridBox{
+    float: left;
+    width: 75%;
+    height: 70%;
+    background-color: lime;
+    position: fixed;
+    top: 0;
+}
+
+#chatBox{
+    float: left;
+    width: 75%;
+    height: 30%;
+    background-color: gray;
+    position: fixed;
+    top: 70%;
+    border-top: solid thin black;
+}
+
+#toolBox{
+    float: left;
+    width: 25%;
+    height: 100%;
+    background-color: whitesmoke;
+    position: fixed;
+    right: 0;
+    border-left: solid thin black;
+}
+
+/*
+ * Grid Area
+ */
+
+.gridSingle{
+    float: left;
+    background-color: pink;
+    text-align: center;
+    height: 100%;
+    outline: solid thin black;
+    margin: auto;
+}
+
+
+
+/*
+ * Toolbox Area
+ */
+
+#toolBoxTop{
+    height: 7.5%;
+}
+
+#colorTools{
+    height: 15%;
+}
+
+#paletteBox{
+    height: 30%;
+    background-color: aliceblue;
+}
+
+#toolBoxBot{
+margin-top: 17%;
+background-color: bisque;
+height: 80px;
+}
+
+.savedColor{
+    margin: 5px;
+    display: inline-block;
+    outline: solid thin black;
+    height: 75px;
+    width: 20%;
+    background-color: white;
+    
+}
+
+/*
+ * Chat Area
+ */
+
