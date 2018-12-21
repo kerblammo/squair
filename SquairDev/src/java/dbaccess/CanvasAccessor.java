@@ -1,4 +1,3 @@
-
 package dbaccess;
 
 import java.sql.Connection;
@@ -10,86 +9,89 @@ import model.Move;
 
 /**
  * Accessor for Canvases in the database
+ *
  * @author Pete
  */
 public class CanvasAccessor {
-    
+
     private static Connection conn;
     private static PreparedStatement selectByIdStatement;
     private static PreparedStatement selectDrawingByIdStatement;
     private static PreparedStatement updateDrawingByMoveStatement;
     private static PreparedStatement createHistoryByMoveStatement;
+    private static PreparedStatement resetCanvasStatement;
+    private static PreparedStatement resetCanvasHistoryStatement;
 
-    
-    
     //private means do not instantiate
-    private CanvasAccessor(){
+    private CanvasAccessor() {
     }
-    
-    
+
     private static void init() throws SQLException {
-        if (conn == null){
+        if (conn == null) {
             conn = ConnectionManager.getConnection();
             selectByIdStatement = conn.prepareStatement("SELECT * FROM canvas WHERE Id = ?");
             selectDrawingByIdStatement = conn.prepareStatement("SELECT * FROM drawing WHERE CanvasId = ? ORDER BY YPosition, XPosition");
             updateDrawingByMoveStatement = conn.prepareStatement("UPDATE drawing SET HexValue = ? WHERE CanvasId = ? AND XPosition = ? AND YPosition = ?");
             createHistoryByMoveStatement = conn.prepareStatement("INSERT INTO drawinghistory (CanvasId, XPosition, YPosition, HexValue, Timestamp) VALUES (?, ?, ?, ?, NOW())");
+            resetCanvasStatement = conn.prepareStatement("UPDATE drawing SET HexValue = 'FFFFFF' WHERE CanvasId = ?");
+            resetCanvasHistoryStatement = conn.prepareStatement("INSERT INTO drawinghistory (CanvasId, XPosition, YPosition, HexValue, Timestamp) VALUES (?, ?, ?, 'FFFFFF', NOW()");
+
         }
-        
-        
+
     }
-    
+
     public static Canvas getCanvas(int id) throws SQLException {
         init();
-        
+
         //perform canvas query
         selectByIdStatement.setInt(1, id);
         ResultSet crs = selectByIdStatement.executeQuery();
         crs.next();
-        
+
         //get parameters of canvas
         String name = crs.getString("NAME");
         int width = crs.getInt("WIDTH");
         int height = crs.getInt("HEIGHT");
         int maxBudget = crs.getInt("MAXBUDGET");
         int budgetRefill = crs.getInt("BUDGETREFILL");
-        
+
         //perform drawing query
         selectDrawingByIdStatement.setInt(1, id);
         ResultSet drs = selectDrawingByIdStatement.executeQuery();
-        
+
         //get the collection of coloured pixels
         String[][] pixels = getStringArrayFromResults(drs, width, height);
-        
+
         //build canvas
         Canvas canvas = new Canvas(id, name, width, height, maxBudget, budgetRefill, pixels);
-        
+
         return canvas;
-        
+
     }
-    
+
     //Turns a resultset from the drawing table into an organized array of coloured pixels 
-    private static String[][] getStringArrayFromResults(ResultSet rs, int width, int height) throws SQLException{
+    private static String[][] getStringArrayFromResults(ResultSet rs, int width, int height) throws SQLException {
         String[][] results = new String[height][width];
         rs.next();
-        for (int y = 0; y < height; y++){
-            for (int x = 0; x < width; x++){
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
                 results[y][x] = rs.getString("HEXVALUE");
                 rs.next();
             }
         }
         return results;
-        
+
     }
-    
+
     /**
      * Draw on the canvas by updating its Drawing and DrawingHistory records
+     *
      * @param move
-     * @return 
+     * @return
      */
-    public static boolean paintCanvas(Move move) throws SQLException{
+    public static boolean paintCanvas(Move move) throws SQLException {
         boolean success;
-        
+
         init();
         //try Drawing first
         //bind parameters
@@ -98,9 +100,9 @@ public class CanvasAccessor {
         updateDrawingByMoveStatement.setInt(3, move.getxPosition());
         updateDrawingByMoveStatement.setInt(4, move.getyPosition());
         success = updateDrawingByMoveStatement.executeUpdate() == 1;
-        
+
         //stop here if first update failed
-        if (success){
+        if (success) {
             //create new record in drawingHistory
             createHistoryByMoveStatement.setInt(1, move.getCanvasId());
             createHistoryByMoveStatement.setInt(2, move.getxPosition());
@@ -108,10 +110,36 @@ public class CanvasAccessor {
             createHistoryByMoveStatement.setString(4, move.getHexValue());
             success = createHistoryByMoveStatement.executeUpdate() == 1;
         }
-        
-        
+
         return success;
     }
-    
-    
+
+    public static boolean resetCanvas(Canvas canvas) throws SQLException {
+        boolean success;
+        init();
+
+        //clear drawing first
+        resetCanvasStatement.setInt(1, canvas.getId());
+        success = resetCanvasStatement.executeUpdate() == (canvas.getWidth() * canvas.getHeight());
+
+        //update drawinghistory, but only if previous update was successful
+        if (success) {
+            for (int x = 0; x < canvas.getWidth(); x++) {
+                for (int y = 0; y < canvas.getHeight(); y++) {
+                    resetCanvasHistoryStatement = conn.prepareStatement("INSERT INTO drawinghistory (CanvasId, XPosition, YPosition, HexValue, Timestamp) VALUES (?, ?, ?, 'FFFFFF', NOW())");
+                    resetCanvasHistoryStatement.setInt(1, canvas.getId());
+                    resetCanvasHistoryStatement.setInt(2, x);
+                    resetCanvasHistoryStatement.setInt(3, y);
+                    success = resetCanvasHistoryStatement.executeUpdate() == 1;
+                    if (!success) {
+                        //something went wrong, exit loop
+                        break;
+                    }
+                }
+            }
+        }
+
+        return success;
+    }
+
 }

@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.8.4
+-- version 4.7.9
 -- https://www.phpmyadmin.net/
 --
--- Host: peteradam.db
--- Generation Time: Dec 16, 2018 at 04:13 PM
--- Server version: 10.3.9-MariaDB-1:10.3.9+maria~xenial
--- PHP Version: 7.1.16-nfsn1
+-- Host: 127.0.0.1:3306
+-- Generation Time: Dec 21, 2018 at 05:10 PM
+-- Server version: 5.7.21
+-- PHP Version: 5.6.35
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -28,16 +28,21 @@ SET time_zone = "+00:00";
 -- Table structure for table `artist`
 --
 
-CREATE TABLE `artist` (
-  `Id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `artist`;
+CREATE TABLE IF NOT EXISTS `artist` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
   `LocationId` int(11) DEFAULT NULL COMMENT 'Link to Canvas',
   `Username` varchar(32) NOT NULL,
   `Password` varchar(100) NOT NULL,
   `Email` varchar(100) NOT NULL,
-  `Permission` int(11) NOT NULL DEFAULT 0 COMMENT '0 for regular user, 1 for super user',
-  `Banned` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Is the user allowed to log in?',
-  `Muted` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Is the user allowed to use chat?'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `Permission` int(11) NOT NULL DEFAULT '0' COMMENT '0 for regular user, 1 for super user',
+  `Banned` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is the user allowed to log in?',
+  `Muted` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Is the user allowed to use chat?',
+  PRIMARY KEY (`Id`),
+  UNIQUE KEY `Username` (`Username`),
+  UNIQUE KEY `Email` (`Email`),
+  KEY `LocationId` (`LocationId`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `artist`
@@ -45,7 +50,9 @@ CREATE TABLE `artist` (
 
 INSERT INTO `artist` (`Id`, `LocationId`, `Username`, `Password`, `Email`, `Permission`, `Banned`, `Muted`) VALUES
 (1, NULL, 'TestSuper', 'foo', 'foo@bar.com', 1, 0, 0),
-(2, NULL, 'BigJim', 'liljim', 'Big@Jim.com', 0, 0, 0);
+(2, NULL, 'BigJim', 'liljim', 'Big@Jim.com', 0, 0, 0),
+(3, NULL, 'Steveinator', 'clothesbootsmotorcycle', 'Steve@nator.com', 0, 0, 0),
+(4, NULL, 'Jimothy', 'thames', 'Jim@thomas.com', 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -53,14 +60,16 @@ INSERT INTO `artist` (`Id`, `LocationId`, `Username`, `Password`, `Email`, `Perm
 -- Table structure for table `canvas`
 --
 
-CREATE TABLE `canvas` (
-  `Id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `canvas`;
+CREATE TABLE IF NOT EXISTS `canvas` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
   `Name` varchar(100) NOT NULL,
   `Width` int(11) NOT NULL COMMENT 'How wide is the canvas',
   `Height` int(11) NOT NULL COMMENT 'How tall is the canvas',
   `MaxBudget` int(11) NOT NULL COMMENT 'How many pixels is a user allowed to store on this canvas?',
-  `BudgetRefill` int(11) NOT NULL COMMENT 'How many pixels does a user recover in a minute?'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `BudgetRefill` int(11) NOT NULL COMMENT 'How many pixels does a user recover in a minute?',
+  PRIMARY KEY (`Id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `canvas`
@@ -75,11 +84,13 @@ INSERT INTO `canvas` (`Id`, `Name`, `Width`, `Height`, `MaxBudget`, `BudgetRefil
 -- Table structure for table `drawing`
 --
 
-CREATE TABLE `drawing` (
+DROP TABLE IF EXISTS `drawing`;
+CREATE TABLE IF NOT EXISTS `drawing` (
   `CanvasId` int(11) NOT NULL COMMENT 'Link to Canvas',
   `XPosition` int(11) NOT NULL COMMENT 'Horizontal coordinate: 0 at left',
   `YPosition` int(11) NOT NULL COMMENT 'Vertical coordinate: 0 at top',
-  `HexValue` char(6) NOT NULL COMMENT 'Hexadecimal colour string. EG 66FF00'
+  `HexValue` char(6) NOT NULL COMMENT 'Hexadecimal colour string. EG 66FF00',
+  PRIMARY KEY (`CanvasId`,`XPosition`,`YPosition`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -10098,14 +10109,17 @@ INSERT INTO `drawing` (`CanvasId`, `XPosition`, `YPosition`, `HexValue`) VALUES
 -- Table structure for table `drawinghistory`
 --
 
-CREATE TABLE `drawinghistory` (
-  `Id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `drawinghistory`;
+CREATE TABLE IF NOT EXISTS `drawinghistory` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
   `CanvasId` int(11) NOT NULL COMMENT 'Link to Canvas',
   `XPosition` int(11) NOT NULL COMMENT 'Horizontal coordinate: 0 at left',
   `YPosition` int(11) NOT NULL COMMENT 'Horizontal coordinate: 0 at top',
   `HexValue` char(6) NOT NULL COMMENT 'Hexadecimal colour string. EG 66FF00',
-  `Timestamp` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `Timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`Id`),
+  KEY `CanvasId` (`CanvasId`)
+) ENGINE=InnoDB AUTO_INCREMENT=10010 DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -10113,14 +10127,19 @@ CREATE TABLE `drawinghistory` (
 -- Table structure for table `message`
 --
 
-CREATE TABLE `message` (
-  `Id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `message`;
+CREATE TABLE IF NOT EXISTS `message` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
   `SenderId` int(11) NOT NULL COMMENT 'Link to Artist',
   `ChannelId` int(11) NOT NULL COMMENT 'Link to Canvas',
   `RecipientId` int(11) DEFAULT NULL COMMENT 'Link to Artist; nullable',
   `Content` varchar(1024) NOT NULL,
-  `Timestamp` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT;
+  `Timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`Id`),
+  KEY `SenderId` (`SenderId`,`ChannelId`,`RecipientId`),
+  KEY `ChannelId` (`ChannelId`),
+  KEY `RecipientId` (`RecipientId`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 ROW_FORMAT=COMPACT;
 
 --
 -- Dumping data for table `message`
@@ -10135,87 +10154,23 @@ INSERT INTO `message` (`Id`, `SenderId`, `ChannelId`, `RecipientId`, `Content`, 
 -- Table structure for table `wallet`
 --
 
-CREATE TABLE `wallet` (
+DROP TABLE IF EXISTS `wallet`;
+CREATE TABLE IF NOT EXISTS `wallet` (
   `UserId` int(11) NOT NULL COMMENT 'Link to artist table; composite key',
   `CanvasId` int(11) NOT NULL COMMENT 'Link to canvas table; composite key',
-  `Value` int(11) NOT NULL COMMENT 'How many pixels does this user have stored?'
+  `Value` int(11) NOT NULL COMMENT 'How many pixels does this user have stored?',
+  PRIMARY KEY (`UserId`,`CanvasId`),
+  KEY `FK_WalletCanvas` (`CanvasId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Indexes for dumped tables
+-- Dumping data for table `wallet`
 --
 
---
--- Indexes for table `artist`
---
-ALTER TABLE `artist`
-  ADD PRIMARY KEY (`Id`),
-  ADD UNIQUE KEY `Username` (`Username`),
-  ADD UNIQUE KEY `Email` (`Email`),
-  ADD KEY `LocationId` (`LocationId`);
-
---
--- Indexes for table `canvas`
---
-ALTER TABLE `canvas`
-  ADD PRIMARY KEY (`Id`);
-
---
--- Indexes for table `drawing`
---
-ALTER TABLE `drawing`
-  ADD PRIMARY KEY (`CanvasId`,`XPosition`,`YPosition`);
-
---
--- Indexes for table `drawinghistory`
---
-ALTER TABLE `drawinghistory`
-  ADD PRIMARY KEY (`Id`),
-  ADD KEY `CanvasId` (`CanvasId`);
-
---
--- Indexes for table `message`
---
-ALTER TABLE `message`
-  ADD PRIMARY KEY (`Id`),
-  ADD KEY `SenderId` (`SenderId`,`ChannelId`,`RecipientId`),
-  ADD KEY `ChannelId` (`ChannelId`),
-  ADD KEY `RecipientId` (`RecipientId`);
-
---
--- Indexes for table `wallet`
---
-ALTER TABLE `wallet`
-  ADD PRIMARY KEY (`UserId`,`CanvasId`),
-  ADD KEY `FK_WalletCanvas` (`CanvasId`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `artist`
---
-ALTER TABLE `artist`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `canvas`
---
-ALTER TABLE `canvas`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `drawinghistory`
---
-ALTER TABLE `drawinghistory`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `message`
---
-ALTER TABLE `message`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+INSERT INTO `wallet` (`UserId`, `CanvasId`, `Value`) VALUES
+(2, 1, 100),
+(3, 1, 100),
+(4, 1, 100);
 
 --
 -- Constraints for dumped tables
@@ -10247,6 +10202,18 @@ ALTER TABLE `message`
 ALTER TABLE `wallet`
   ADD CONSTRAINT `wallet_ibfk_1` FOREIGN KEY (`UserId`) REFERENCES `artist` (`Id`),
   ADD CONSTRAINT `wallet_ibfk_2` FOREIGN KEY (`CanvasId`) REFERENCES `canvas` (`Id`);
+
+DELIMITER $$
+--
+-- Events
+--
+DROP EVENT `RefillWallets`$$
+CREATE DEFINER=`root`@`localhost` EVENT `RefillWallets` ON SCHEDULE EVERY 1 MINUTE STARTS '2018-12-21 12:23:00' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+update wallet w JOIN canvas c on w.CanvasId = c.Id set w.Value = w.value + c.BudgetRefill;
+update wallet w join canvas c on w.CanvasId = c.Id set w.value = c.MaxBudget where w.value > c.MaxBudget;
+END$$
+
+DELIMITER ;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

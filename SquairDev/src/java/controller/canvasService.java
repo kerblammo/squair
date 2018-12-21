@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import dbaccess.BudgetAccessor;
 import dbaccess.CanvasAccessor;
 import dbaccess.MoveAccessor;
@@ -25,7 +26,7 @@ import model.Move;
  *
  * @author Pete
  */
-@WebServlet(name = "canvasService", urlPatterns = {"/canvasservice/load/*", "/canvasservice/refresh/*", "/canvasservice"})
+@WebServlet(name = "canvasService", urlPatterns = {"/canvasservice/load/*", "/canvasservice/refresh/*", "/canvasservice/reset", "/canvasservice"})
 public class canvasService extends HttpServlet {
 
     /**
@@ -100,37 +101,64 @@ public class canvasService extends HttpServlet {
             String uri = request.getRequestURI();
             String pi = request.getPathInfo();
             
-            //build Move object from JSON
-            Scanner sc = new Scanner(request.getReader());
-            String jsonData = sc.nextLine();
-            Move move = g.fromJson(jsonData, Move.class);
+            if (uri.contains("reset")){
+                resetCanvas(request, g, out);
+            } else {
+                paintCanvas(request, g, out);
+            }
             
-            //get userId and permission level
-            JsonElement jsonElement = new JsonParser().parse(jsonData);
-            JsonObject jobject = jsonElement.getAsJsonObject();
-            int userId = jobject.get("userId").getAsInt();
-            int permission = jobject.get("permission").getAsInt();
-            //out.println("Permission Level: " + permission);
+            
+        }
+    }
+    
+    private void resetCanvas(HttpServletRequest request, Gson g, final PrintWriter out) throws JsonSyntaxException, IOException {
+        //build canvas from JSON
+        Scanner sc = new Scanner(request.getReader());
+        String jsonData = sc.nextLine();
+        Canvas canvas = g.fromJson(jsonData, Canvas.class);
+        
+        
+        //reset the canvas
+        try {
+            boolean success = CanvasAccessor.resetCanvas(canvas);
+            out.println(success);
+        } catch (SQLException ex){
+            System.err.println(ex.getMessage());
+            out.println("ERROR: " + ex.getMessage());
+        }
+        
+    }
 
-            //if user does not have super privileges, they must spend their budget
-            boolean budgetConfirmed = true;
-            if (permission == 0){
-                budgetConfirmed = spendBudget(userId, move.getCanvasId());
+    private void paintCanvas(HttpServletRequest request, Gson g, final PrintWriter out) throws JsonSyntaxException, IOException {
+        //build Move object from JSON
+        Scanner sc = new Scanner(request.getReader());
+        String jsonData = sc.nextLine();
+        Move move = g.fromJson(jsonData, Move.class);
+        
+        //get userId and permission level
+        JsonElement jsonElement = new JsonParser().parse(jsonData);
+        JsonObject jobject = jsonElement.getAsJsonObject();
+        int userId = jobject.get("userId").getAsInt();
+        int permission = jobject.get("permission").getAsInt();
+        //out.println("Permission Level: " + permission);
+        
+        //if user does not have super privileges, they must spend their budget
+        boolean budgetConfirmed = true;
+        if (permission == 0){
+            budgetConfirmed = spendBudget(userId, move.getCanvasId());
+        }
+        
+        //stop here if something failed when spending budget
+        if (budgetConfirmed){
+            //must update both Drawing table and DrawingHistory table
+            try {
+                boolean success = CanvasAccessor.paintCanvas(move);
+                out.println(success);
+            } catch (SQLException ex){
+                System.err.println(ex.getMessage());
+                out.println("ERROR: " + ex.getMessage());
             }
             
-            //stop here if something failed when spending budget
-            if (budgetConfirmed){
-                //must update both Drawing table and DrawingHistory table
-                try {
-                   boolean success = CanvasAccessor.paintCanvas(move);
-                   out.println(success);
-                } catch (SQLException ex){
-                    System.err.println(ex.getMessage());
-                    out.println("ERROR: SQLException thrown");
-                }
-                
-                
-            }
             
         }
     }
